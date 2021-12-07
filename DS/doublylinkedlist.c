@@ -5,11 +5,12 @@ struct node
 {
     int data;
     struct node *next;
+    struct node *prev;
 };
 
 struct node *head;
 
-void begininsert(int item)
+void begin_insert(int item)
 {
     struct node *ptr;
 
@@ -20,13 +21,25 @@ void begininsert(int item)
     }
     else
     {
-        ptr->data = item;
-        ptr->next = head;
-        head = ptr;
+        if (head == NULL)
+        {
+            ptr->next = NULL;
+            ptr->prev = NULL;
+            ptr->data = item;
+            head = ptr;
+        }
+        else
+        {
+            ptr->data = item;
+            ptr->prev = NULL;
+            ptr->next = head;
+            head->prev = ptr;
+            head = ptr;
+        }
     }
 }
 
-void lastinsert(int item)
+void insert_last(int item)
 {
     struct node *ptr, *temp;
     ptr = (struct node *)malloc(sizeof(struct node));
@@ -40,8 +53,8 @@ void lastinsert(int item)
         if (head == NULL)
         {
             ptr->next = NULL;
+            ptr->prev = NULL;
             head = ptr;
-            printf("node is inserted\n");
         }
         else
         {
@@ -51,30 +64,63 @@ void lastinsert(int item)
                 temp = temp->next;
             }
             temp->next = ptr;
+            ptr->prev = temp;
             ptr->next = NULL;
-            printf("node is inserted\n");
         }
     }
 }
 
-void begin_delete()
+void insert(int position, int item)
+{
+    struct node *ptr, *temp;
+    ptr = (struct node *)malloc(sizeof(struct node));
+    if (ptr == NULL)
+    {
+        printf("overflow\n");
+    }
+    else
+    {
+        temp = head;
+        for (int i = 0; i < position; i++)
+        {
+            temp = temp->next;
+            if (temp == NULL)
+            {
+                return;
+            }
+        }
+        ptr->data = item;
+        ptr->next = temp->next;
+        ptr->prev = temp;
+        temp->next = ptr;
+        temp->next->prev = ptr;
+    }
+}
+
+void delete_begin()
 {
     struct node *ptr;
     if (head == NULL)
     {
         printf("list is empty\n");
     }
+    else if (head->next == NULL)
+    {
+        head = NULL;
+        free(head);
+    }
     else
     {
         ptr = head;
-        head = ptr->next;
+        head = head->next;
+        head->prev = NULL;
         free(ptr);
     }
 }
 
-void last_delete()
+void delete_last()
 {
-    struct node *ptr, *ptr1;
+    struct node *ptr;
     if (head == NULL)
     {
         printf("there is not item in list\n");
@@ -89,10 +135,9 @@ void last_delete()
         ptr = head;
         while (ptr->next != NULL)
         {
-            ptr1 = ptr;
             ptr = ptr->next;
         }
-        ptr1->next = NULL;
+        ptr->prev->next = NULL;
         free(ptr);
     }
 }
@@ -140,21 +185,33 @@ void display()
 
 void main()
 {
-    printf("begin insert\n");
-    begininsert(1);
-    begininsert(2);
-    begininsert(3);
-    printf("last insert\n");
-    lastinsert(4);
-    lastinsert(5);
-    lastinsert(6);
+    // Insert Begin
+    printf("insert begin\n");
+    begin_insert(1);
+    begin_insert(2);
+    begin_insert(3);
     display();
-    printf("begin delete\n");
-    begin_delete();
-    begin_delete();
-    begin_delete();
+
+    // Insert from Last
+    printf("insert last\n");
+    insert_last(1);
+    insert_last(2);
+    insert_last(3);
     display();
-    printf("last delete\n");
-    last_delete();
+
+    printf("insert at positoin 2\n");
+    insert(2, 4);
+    display();
+
+    printf("Delete begin\n");
+    delete_begin();
+    display();
+
+    printf("Delete last\n");
+    delete_last();
+    display();
+
+    printf("Search\n");
+    search(4);
     display();
 }
